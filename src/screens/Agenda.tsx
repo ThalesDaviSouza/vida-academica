@@ -1,16 +1,24 @@
-import { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import CalendarGrid from '../components/agenda/CalendarGrid';
+import DayDetails from '../components/agenda/DayDetails';
+import MonthNav from '../components/agenda/MonthNav';
 import PageHeader from '../components/PageHeader';
-import { useSemestresStore } from '../store/semestresStore';
-import { colors, spacing } from '../theme';
+import { useAgenda } from '../hooks/useAgenda';
+import { colors } from '../theme';
 
 export default function AgendaScreen() {
-  const { semestres, semestreAtivo, load, setAtivo } = useSemestresStore();
-
-  useEffect(() => {
-    load();
-  }, []);
+  const {
+    semestres,
+    semestreAtivo,
+    setAtivo,
+    monthTitle,
+    goPrevMonth,
+    goNextMonth,
+    cells,
+    selectDay,
+    details,
+  } = useAgenda();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -21,18 +29,16 @@ export default function AgendaScreen() {
         onSelectSemestreAtivo={setAtivo}
       />
 
-      <View style={styles.body}>
-        <Text style={styles.title}>Agenda</Text>
-        <Text style={styles.sub}>Em breve: visao de calendario.</Text>
-      </View>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <MonthNav title={monthTitle} onPrev={goPrevMonth} onNext={goNextMonth} />
+        <CalendarGrid cells={cells} onSelectDay={selectDay} />
+        <DayDetails details={details} />
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  body: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.md },
-  title: { fontSize: 24, fontWeight: 'bold', color: colors.textPrimary },
-  sub: { marginTop: spacing.sm, color: colors.textSecondary, textAlign: 'center' },
 });
 

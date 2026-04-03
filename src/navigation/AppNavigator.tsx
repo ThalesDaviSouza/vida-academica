@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   NavigationContainer,
   StackActions,
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import {
+  BackHandler,
   Pressable,
   StyleSheet,
   Text,
@@ -39,8 +40,8 @@ const MENU_ITEMS: Array<{
   icon: string;
 }> = [
   { name: 'Hoje', component: HomeScreen, icon: '🏠' },
-  { name: 'Matérias', component: MateriasNavigator, icon: '📚' },
   { name: 'Agenda', component: AgendaScreen, icon: '📅' },
+  { name: 'Matérias', component: MateriasNavigator, icon: '📚' },
   { name: 'Atividades', component: AtividadesScreen, icon: '✅' },
   { name: 'Provas', component: ProvasScreen, icon: '📝' },
   { name: 'Semestres', component: SemestresScreen, icon: '🗓️' },
@@ -67,8 +68,19 @@ export default function AppNavigator() {
     if (!navigationRef.isReady()) return;
     if (routeName === currentRoute) return;
 
-    navigationRef.dispatch(StackActions.replace(routeName));
+    navigationRef.navigate(routeName);
   }
+
+  useEffect(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (menuOpen) {
+        setMenuOpen(false);
+        return true;
+      }
+      return false;
+    });
+    return () => sub.remove();
+  }, [menuOpen]);
 
   return (
     <MenuProvider

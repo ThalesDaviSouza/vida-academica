@@ -9,7 +9,7 @@ import HomeProvaCard from '../components/home/HomeProvaCard';
 import HomeSection from '../components/home/HomeSection';
 import { useHome } from '../hooks/useHome';
 import { colors, radius, spacing } from '../theme';
-import { replace } from '../navigation/rootNavigation';
+import { navigate } from '../navigation/rootNavigation';
 import PageHeader from '../components/PageHeader';
 
 export default function HomeScreen() {
@@ -49,18 +49,18 @@ export default function HomeScreen() {
   }, [items, collapsed]);
 
   function abrirDetalheMateria(materia: Materia) {
-    replace('Matérias', {
+    navigate('Matérias', {
       screen: 'MateriaDetalhe',
       params: { materia },
     });
   }
 
   function abrirDetalheAtividade(atividade: Atividade) {
-    replace('Atividades', { openAtividadeId: atividade.id });
+    navigate('Atividades', { openAtividadeId: atividade.id });
   }
 
   function abrirDetalheProva(prova: Prova) {
-    replace('Provas', { openProvaId: prova.id });
+    navigate('Provas', { openProvaId: prova.id });
   }
 
   function renderItem({ item }: { item: HomeItem }) {
