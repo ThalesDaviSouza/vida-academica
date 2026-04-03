@@ -1,20 +1,34 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { useEffect } from 'react';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { initDatabase } from './src/storage/database';
+import AppNavigator from './src/navigation/AppNavigator';
+import { useSemestresStore } from './src/store/semestresStore';
+import { useMateriasStore } from './src/store/materiasStore';
+import { usePresencasStore } from './src/store/presencasStore';
 
 export default function App() {
+  const { load: loadSemestres, semestreAtivo } = useSemestresStore();
+  const { load: loadMaterias, materias } = useMateriasStore();
+  const { autoPresencaTodas } = usePresencasStore();
+
+  useEffect(() => {
+    initDatabase();
+    loadSemestres();
+  }, []);
+
+  useEffect(() => {
+    if (semestreAtivo) loadMaterias(semestreAtivo.id);
+  }, [semestreAtivo]);
+
+  useEffect(() => {
+    if (semestreAtivo && materias.length > 0) {
+      autoPresencaTodas(materias, semestreAtivo);
+    }
+  }, [materias]);
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <SafeAreaProvider>
+      <AppNavigator />
+    </SafeAreaProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
