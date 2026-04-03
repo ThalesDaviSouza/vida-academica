@@ -2,6 +2,17 @@ import db from './database';
 import { Prova } from '../models';
 
 export const provasRepository = {
+  getBySemestre(semestreId: string): Prova[] {
+    return db.getAllSync<Prova>(
+      `SELECT p.*
+       FROM provas p
+       INNER JOIN materias m ON m.id = p.materiaId
+       WHERE m.semestreId = ?
+       ORDER BY p.data, p.tipo`,
+      [semestreId]
+    );
+  },
+
   getByMateria(materiaId: string): Prova[] {
     return db.getAllSync<Prova>(
       'SELECT * FROM provas WHERE materiaId = ? ORDER BY data',

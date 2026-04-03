@@ -7,6 +7,7 @@ import {
   calcularFrequencia,
   FrequenciaStats,
 } from '../services/presencaService';
+import { notifyFrequenciaRiscoOnce } from '../services/notificationsService';
 
 interface PresencasState {
   presencas: Presenca[];
@@ -24,6 +25,13 @@ export const usePresencasStore = create<PresencasState>((set) => ({
   load: (materiaId, materia, semestreDataInicio) => {
     const presencas = presencasRepository.getByMateria(materiaId);
     const stats = calcularFrequencia(presencas, materia, semestreDataInicio);
+    if (stats.emRisco) {
+      void notifyFrequenciaRiscoOnce(
+        `${materia.id}:${semestreDataInicio}`,
+        materia.nome,
+        stats.percentualFaltas
+      );
+    }
     set({ presencas, stats });
   },
 
@@ -36,6 +44,13 @@ export const usePresencasStore = create<PresencasState>((set) => ({
     presencasRepository.updateStatus(presenca.id, novoStatus);
     const presencas = presencasRepository.getByMateria(presenca.materiaId);
     const stats = calcularFrequencia(presencas, materia, semestreDataInicio);
+    if (stats.emRisco) {
+      void notifyFrequenciaRiscoOnce(
+        `${materia.id}:${semestreDataInicio}`,
+        materia.nome,
+        stats.percentualFaltas
+      );
+    }
     set({ presencas, stats });
   },
 
@@ -57,6 +72,13 @@ export const usePresencasStore = create<PresencasState>((set) => ({
 
     const presencas = presencasRepository.getByMateria(materiaId);
     const stats = calcularFrequencia(presencas, materia, semestreDataInicio);
+    if (stats.emRisco) {
+      void notifyFrequenciaRiscoOnce(
+        `${materia.id}:${semestreDataInicio}`,
+        materia.nome,
+        stats.percentualFaltas
+      );
+    }
     set({ presencas, stats });
   },
 
@@ -73,6 +95,16 @@ export const usePresencasStore = create<PresencasState>((set) => ({
             status: 'auto_presente',
           });
         }
+      }
+
+      const presencas = presencasRepository.getByMateria(materia.id);
+      const stats = calcularFrequencia(presencas, materia, semestre.dataInicio);
+      if (stats.emRisco) {
+        void notifyFrequenciaRiscoOnce(
+          `${materia.id}:${semestre.dataInicio}`,
+          materia.nome,
+          stats.percentualFaltas
+        );
       }
     }
   },

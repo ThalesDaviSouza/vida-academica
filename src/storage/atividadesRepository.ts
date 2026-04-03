@@ -2,6 +2,21 @@ import db from './database';
 import { Atividade } from '../models';
 
 export const atividadesRepository = {
+  getBySemestre(semestreId: string): Atividade[] {
+    const rows = db.getAllSync<any>(
+      `SELECT a.*
+       FROM atividades a
+       INNER JOIN materias m ON m.id = a.materiaId
+       WHERE m.semestreId = ?
+       ORDER BY
+         CASE a.status WHEN 'pendente' THEN 0 ELSE 1 END,
+         a.dataEntrega,
+         a.titulo`,
+      [semestreId]
+    );
+    return rows.map(deserialize);
+  },
+
   getByMateria(materiaId: string): Atividade[] {
     const rows = db.getAllSync<any>(
       'SELECT * FROM atividades WHERE materiaId = ? ORDER BY dataEntrega',

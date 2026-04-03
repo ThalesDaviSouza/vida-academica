@@ -1,10 +1,13 @@
 import { useEffect } from 'react';
+import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { initDatabase } from './src/storage/database';
 import AppNavigator from './src/navigation/AppNavigator';
 import { useSemestresStore } from './src/store/semestresStore';
 import { useMateriasStore } from './src/store/materiasStore';
 import { usePresencasStore } from './src/store/presencasStore';
+import { colors } from './src/theme';
+import { initNotifications } from './src/services/notificationsService';
 
 export default function App() {
   const { load: loadSemestres, semestreAtivo } = useSemestresStore();
@@ -13,6 +16,7 @@ export default function App() {
 
   useEffect(() => {
     initDatabase();
+    void initNotifications();
     loadSemestres();
   }, []);
 
@@ -28,6 +32,7 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
+      <StatusBar style="light" backgroundColor={colors.surface} />
       <AppNavigator />
     </SafeAreaProvider>
   );

@@ -54,6 +54,17 @@ export function initDatabase() {
       status TEXT NOT NULL DEFAULT 'pendente' CHECK(status IN ('pendente','concluido')),
       FOREIGN KEY (materiaId) REFERENCES materias(id) ON DELETE CASCADE
     );
+
+    CREATE TABLE IF NOT EXISTS notificacoes (
+      id TEXT PRIMARY KEY NOT NULL,
+      tipo TEXT NOT NULL,
+      refId TEXT NOT NULL,
+      expoId TEXT NOT NULL,
+      fireAt TEXT NOT NULL,
+      createdAt TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_notificacoes_tipo_refId ON notificacoes (tipo, refId);
   `);
 }
 
