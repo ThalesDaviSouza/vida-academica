@@ -15,6 +15,7 @@ import ColorPicker from '../components/ColorPicker';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MateriasStackParamList } from '../navigation/MateriasNavigator';
+import PageHeader from '../components/PageHeader';
 
 type MateriasNavProp = NativeStackNavigationProp<MateriasStackParamList, 'MateriasList'>;
 
@@ -31,7 +32,7 @@ const DIAS_SEMANA = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
 export default function MateriasScreen() {
   const { materias, load, criar, editar, deletar } = useMateriasStore();
-  const { semestreAtivo, load: loadSemestres } = useSemestresStore();
+  const { semestres, semestreAtivo, load: loadSemestres, setAtivo } = useSemestresStore();
   const [modalVisible, setModalVisible] = useState(false);
   const [editando, setEditando] = useState<Materia | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -78,10 +79,6 @@ export default function MateriasScreen() {
       Alert.alert('Atenção', 'Informe o horário da aula.');
       return;
     }
-    if (!form.dataFim) {
-      Alert.alert('Atenção', 'Informe a data final da matéria.');
-      return;
-    }
     if (!semestreAtivo) return;
 
     const dados = {
@@ -90,7 +87,8 @@ export default function MateriasScreen() {
       cor: form.cor,
       diasSemana: form.diasSemana,
       horario: form.horario,
-      dataFim: form.dataFim,
+      // Opcional: se não informar, assume o fim do semestre ativo.
+      dataFim: form.dataFim || semestreAtivo.dataFim,
       semestreId: semestreAtivo.id,
     };
 
@@ -146,21 +144,21 @@ export default function MateriasScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.headerTitle}>Matérias</Text>
-          {semestreAtivo && (
-            <Text style={styles.headerSub}>{semestreAtivo.nome}</Text>
-          )}
-        </View>
-        <TouchableOpacity
-          style={[styles.btnNovo, !semestreAtivo && styles.btnNovoDisabled]}
-          onPress={abrirCriar}
-          disabled={!semestreAtivo}
-        >
-          <Text style={styles.btnNovoText}>+ Nova</Text>
-        </TouchableOpacity>
-      </View>
+      <PageHeader
+        title="Matérias"
+        semestres={semestres}
+        semestreAtivoId={semestreAtivo?.id}
+        onSelectSemestreAtivo={setAtivo}
+        rightAction={
+          <TouchableOpacity
+            style={[styles.btnNovo, !semestreAtivo && styles.btnNovoDisabled]}
+            onPress={abrirCriar}
+            disabled={!semestreAtivo}
+          >
+            <Text style={styles.btnNovoText}>+ Nova</Text>
+          </TouchableOpacity>
+        }
+      />
 
       {!semestreAtivo ? (
         <View style={styles.empty}>
@@ -240,10 +238,19 @@ export default function MateriasScreen() {
 
               <View style={styles.fieldGroup}>
                 <DatePicker
-                  label="Data final da matéria *"
+                  label="Data final da matéria (opcional)"
                   value={form.dataFim}
                   onChange={(v) => setForm((f) => ({ ...f, dataFim: v }))}
+                  placeholder="Até o fim do semestre"
                 />
+                {form.dataFim ? (
+                  <TouchableOpacity
+                    style={styles.btnClearDate}
+                    onPress={() => setForm((f) => ({ ...f, dataFim: '' }))}
+                  >
+                    <Text style={styles.btnClearDateText}>Limpar</Text>
+                  </TouchableOpacity>
+                ) : null}
               </View>
 
               <View style={styles.modalActions}>
@@ -373,4 +380,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   btnSalvarText: { color: '#fff', fontWeight: '600' },
+
+  btnClearDate: {
+    alignSelf: 'flex-end',
+    marginTop: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: radius.full,
+    backgroundColor: colors.surfaceHigh,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  btnClearDateText: { color: colors.textSecondary, fontWeight: '600', fontSize: 12 },
 });

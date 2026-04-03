@@ -18,6 +18,7 @@ import { useProvasStore } from '../store/provasStore';
 import { useSemestresStore } from '../store/semestresStore';
 import { colors, radius, spacing } from '../theme';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import PageHeader from '../components/PageHeader';
 
 type Filtro = 'todas' | 'proximas';
 
@@ -38,7 +39,7 @@ const EMPTY_FORM = {
 export default function ProvasScreen() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
-  const { semestreAtivo, load: loadSemestres } = useSemestresStore();
+  const { semestres, semestreAtivo, load: loadSemestres, setAtivo } = useSemestresStore();
   const { materias, load: loadMaterias } = useMateriasStore();
   const { provas, load, criar, editar, deletar } = useProvasStore();
 
@@ -195,19 +196,21 @@ export default function ProvasScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.headerTitle}>Provas</Text>
-          {semestreAtivo && <Text style={styles.headerSub}>{semestreAtivo.nome}</Text>}
-        </View>
-        <TouchableOpacity
-          style={[styles.btnNovo, (!semestreAtivo || materias.length === 0) && styles.btnNovoDisabled]}
-          onPress={abrirCriar}
-          disabled={!semestreAtivo || materias.length === 0}
-        >
-          <Text style={styles.btnNovoText}>+ Nova</Text>
-        </TouchableOpacity>
-      </View>
+      <PageHeader
+        title="Provas"
+        semestres={semestres}
+        semestreAtivoId={semestreAtivo?.id}
+        onSelectSemestreAtivo={setAtivo}
+        rightAction={
+          <TouchableOpacity
+            style={[styles.btnNovo, (!semestreAtivo || materias.length === 0) && styles.btnNovoDisabled]}
+            onPress={abrirCriar}
+            disabled={!semestreAtivo || materias.length === 0}
+          >
+            <Text style={styles.btnNovoText}>+ Nova</Text>
+          </TouchableOpacity>
+        }
+      />
 
       {!semestreAtivo ? (
         <View style={styles.empty}>

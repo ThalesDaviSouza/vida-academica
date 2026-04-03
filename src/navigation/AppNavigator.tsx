@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import {
   NavigationContainer,
   StackActions,
@@ -20,6 +20,7 @@ import ProvasScreen from '../screens/Provas';
 import SemestresScreen from '../screens/Semestres';
 import { colors, radius, spacing } from '../theme';
 import { navigationRef } from './rootNavigation';
+import { MenuProvider } from './MenuContext';
 
 export type RootStackParamList = {
   Hoje: undefined;
@@ -51,15 +52,6 @@ export default function AppNavigator() {
   const [currentRoute, setCurrentRoute] =
     useState<keyof RootStackParamList>('Hoje');
 
-  const currentTitle = useMemo(() => {
-    if (currentRoute === 'Hoje') {
-      return 'Vida Acadêmica';
-    }
-
-    const currentItem = MENU_ITEMS.find((item) => item.name === currentRoute);
-    return currentItem?.name ?? 'Vida Acadêmica';
-  }, [currentRoute]);
-
   function syncCurrentRoute() {
     const rootState = navigationRef.getRootState();
     const route = rootState.routes[rootState.index];
@@ -79,7 +71,14 @@ export default function AppNavigator() {
   }
 
   return (
-    <View style={styles.container}>
+    <MenuProvider
+      value={{
+        menuOpen,
+        toggleMenu: () => setMenuOpen((v) => !v),
+        closeMenu: () => setMenuOpen(false),
+      }}
+    >
+      <View style={styles.container}>
       <NavigationContainer
         ref={navigationRef}
         onReady={syncCurrentRoute}
@@ -92,24 +91,8 @@ export default function AppNavigator() {
           initialRouteName="Hoje"
           screenOptions={{
             animation: 'fade',
-            headerStyle: styles.header,
-            headerShadowVisible: false,
-            headerBackVisible: false,
-            headerTintColor: colors.textPrimary,
-            headerTitleStyle: styles.headerTitle,
-            headerTitleAlign: 'left',
+            headerShown: false,
             contentStyle: styles.content,
-            headerRight: () => (
-              <TouchableOpacity
-                accessibilityRole="button"
-                accessibilityLabel="Abrir menu de navegação"
-                activeOpacity={0.85}
-                onPress={() => setMenuOpen((value) => !value)}
-                style={styles.menuButton}
-              >
-                <Text style={styles.menuButtonIcon}>{menuOpen ? '✕' : '☰'}</Text>
-              </TouchableOpacity>
-            ),
           }}
         >
           {MENU_ITEMS.map((item) => (
@@ -117,7 +100,6 @@ export default function AppNavigator() {
               key={item.name}
               name={item.name}
               component={item.component}
-              options={{ title: currentTitle }}
             />
           ))}
         </Stack.Navigator>
@@ -155,7 +137,8 @@ export default function AppNavigator() {
           </View>
         </>
       )}
-    </View>
+      </View>
+    </MenuProvider>
   );
 }
 
@@ -166,29 +149,6 @@ const styles = StyleSheet.create({
   },
   content: {
     backgroundColor: colors.background,
-  },
-  header: {
-    backgroundColor: colors.surface,
-  },
-  headerTitle: {
-    color: colors.textPrimary,
-    fontSize: 22,
-    fontWeight: '700',
-  },
-  menuButton: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.full,
-    backgroundColor: colors.surfaceHigh,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  menuButtonIcon: {
-    fontSize: 18,
-    color: colors.textPrimary,
-    fontWeight: '700',
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,

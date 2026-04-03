@@ -20,6 +20,7 @@ import { colors, radius, spacing } from '../theme';
 import DatePicker from '../components/DatePicker';
 import WeekDaySelector from '../components/WeekDaySelector';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import PageHeader from '../components/PageHeader';
 
 type FiltroStatus = 'todas' | 'pendente' | 'concluido';
 
@@ -34,7 +35,7 @@ const EMPTY_FORM = {
 export default function AtividadesScreen() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
-  const { semestreAtivo, load: loadSemestres } = useSemestresStore();
+  const { semestres, semestreAtivo, load: loadSemestres, setAtivo } = useSemestresStore();
   const { materias, load: loadMaterias } = useMateriasStore();
   const {
     atividades,
@@ -214,21 +215,21 @@ export default function AtividadesScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.headerTitle}>Atividades</Text>
-          {semestreAtivo && (
-            <Text style={styles.headerSub}>{semestreAtivo.nome}</Text>
-          )}
-        </View>
-        <TouchableOpacity
-          style={[styles.btnNovo, (!semestreAtivo || materias.length === 0) && styles.btnNovoDisabled]}
-          onPress={abrirCriar}
-          disabled={!semestreAtivo || materias.length === 0}
-        >
-          <Text style={styles.btnNovoText}>+ Nova</Text>
-        </TouchableOpacity>
-      </View>
+      <PageHeader
+        title="Atividades"
+        semestres={semestres}
+        semestreAtivoId={semestreAtivo?.id}
+        onSelectSemestreAtivo={setAtivo}
+        rightAction={
+          <TouchableOpacity
+            style={[styles.btnNovo, (!semestreAtivo || materias.length === 0) && styles.btnNovoDisabled]}
+            onPress={abrirCriar}
+            disabled={!semestreAtivo || materias.length === 0}
+          >
+            <Text style={styles.btnNovoText}>+ Nova</Text>
+          </TouchableOpacity>
+        }
+      />
 
       {!semestreAtivo ? (
         <View style={styles.empty}>

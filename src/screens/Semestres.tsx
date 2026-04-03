@@ -5,11 +5,12 @@ import { useSemestresStore } from '../store/semestresStore';
 import { Semestre } from '../models';
 import { colors, spacing, radius } from '../theme';
 import DatePicker from '../components/DatePicker';
+import PageHeader from '../components/PageHeader';
 
 const EMPTY_FORM = { nome: '', dataInicio: '', dataFim: '' };
 
 export default function SemestresScreen() {
-  const { semestres, load, criar, editar, setAtivo, deletar } = useSemestresStore();
+  const { semestres, semestreAtivo, load, criar, editar, setAtivo, deletar } = useSemestresStore();
   const [modalVisible, setModalVisible] = useState(false);
   const [editando, setEditando] = useState<Semestre | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -81,12 +82,17 @@ export default function SemestresScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Semestres</Text>
-        <TouchableOpacity style={styles.btnNovo} onPress={abrirCriar}>
-          <Text style={styles.btnNovoText}>+ Novo</Text>
-        </TouchableOpacity>
-      </View>
+      <PageHeader
+        title="Semestres"
+        semestres={semestres}
+        semestreAtivoId={semestreAtivo?.id}
+        onSelectSemestreAtivo={setAtivo}
+        rightAction={
+          <TouchableOpacity style={styles.btnNovo} onPress={abrirCriar}>
+            <Text style={styles.btnNovoText}>+ Novo</Text>
+          </TouchableOpacity>
+        }
+      />
 
       <FlatList
         data={semestres}

@@ -5,12 +5,12 @@ import type { HomeItem } from '../models/home';
 import type { Materia, Prova, Atividade } from '../models';
 import HomeAulaCard from '../components/home/HomeAulaCard';
 import HomeAtividadeCard from '../components/home/HomeAtividadeCard';
-import HomeHeader from '../components/home/HomeHeader';
 import HomeProvaCard from '../components/home/HomeProvaCard';
 import HomeSection from '../components/home/HomeSection';
 import { useHome } from '../hooks/useHome';
 import { colors, radius, spacing } from '../theme';
 import { replace } from '../navigation/rootNavigation';
+import PageHeader from '../components/PageHeader';
 
 export default function HomeScreen() {
   const {
@@ -126,8 +126,8 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <HomeHeader
-        title="Semestre Ativo"
+      <PageHeader
+        title="Hoje"
         semestres={semestres}
         semestreAtivoId={semestreAtivo.id}
         onSelectSemestreAtivo={setSemestreAtivo}
