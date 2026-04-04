@@ -11,6 +11,11 @@ function CalendarGrid({
   cells: AgendaCalendarCell[];
   onSelectDay: (iso: string) => void;
 }) {
+  const weeks: AgendaCalendarCell[][] = [];
+  for (let i = 0; i < cells.length; i += 7) {
+    weeks.push(cells.slice(i, i + 7));
+  }
+
   return (
     <View>
       <View style={styles.weekdaysRow}>
@@ -21,36 +26,38 @@ function CalendarGrid({
         ))}
       </View>
 
-      <View style={styles.grid}>
-        {cells.map((cell) => {
-          const dimmed = !cell.inMonth;
-          return (
-            <Pressable
-              key={cell.iso}
-              onPress={() => onSelectDay(cell.iso)}
-              style={[
-                styles.dayCell,
-                cell.selected && styles.dayCellSelected,
-              ]}
-            >
-              <Text
+      {weeks.map((week, rowIdx) => (
+        <View key={`week-${rowIdx}`} style={styles.weekRow}>
+          {week.map((cell) => {
+            const dimmed = !cell.inMonth;
+            return (
+              <Pressable
+                key={cell.iso}
+                onPress={() => onSelectDay(cell.iso)}
                 style={[
-                  styles.dayNumber,
-                  dimmed && styles.dayNumberDim,
-                  cell.selected && styles.dayNumberSelected,
+                  styles.dayCell,
+                  cell.selected && styles.dayCellSelected,
                 ]}
               >
-                {cell.day}
-              </Text>
-              <View style={styles.dots}>
-                {cell.dots.map((c, idx) => (
-                  <View key={`${cell.iso}-${idx}`} style={[styles.dot, { backgroundColor: c }]} />
-                ))}
-              </View>
-            </Pressable>
-          );
-        })}
-      </View>
+                <Text
+                  style={[
+                    styles.dayNumber,
+                    dimmed && styles.dayNumberDim,
+                    cell.selected && styles.dayNumberSelected,
+                  ]}
+                >
+                  {cell.day}
+                </Text>
+                <View style={styles.dots}>
+                  {cell.dots.map((c, idx) => (
+                    <View key={`${cell.iso}-${idx}`} style={[styles.dot, { backgroundColor: c }]} />
+                  ))}
+                </View>
+              </Pressable>
+            );
+          })}
+        </View>
+      ))}
     </View>
   );
 }
@@ -70,14 +77,14 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     fontSize: 12,
   },
-  grid: {
+  weekRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    paddingHorizontal: spacing.md,
     gap: spacing.xs,
+    paddingHorizontal: spacing.md,
+    marginBottom: spacing.xs,
   },
   dayCell: {
-    width: '13.5%',
+    flex: 1,
     aspectRatio: 1,
     borderRadius: radius.md,
     backgroundColor: colors.surface,
@@ -98,4 +105,3 @@ const styles = StyleSheet.create({
   dots: { flexDirection: 'row', gap: 3, height: 6 },
   dot: { width: 6, height: 6, borderRadius: radius.full },
 });
-

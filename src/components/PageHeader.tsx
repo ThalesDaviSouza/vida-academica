@@ -10,7 +10,6 @@ import {
 import { colors, radius, spacing } from '../theme';
 import type { Semestre } from '../models';
 import DatePicker from './DatePicker';
-import { useAppMenu } from '../navigation/MenuContext';
 
 type Props = {
   title: string;
@@ -33,7 +32,6 @@ export default function PageHeader({
   dateIso,
   onDateChange,
 }: Props) {
-  const { menuOpen, toggleMenu } = useAppMenu();
   const [modalVisible, setModalVisible] = useState(false);
 
   const semestreAtivoNome = useMemo(() => {
@@ -45,22 +43,13 @@ export default function PageHeader({
   return (
     <View style={styles.header}>
       <View style={styles.topRow}>
-        {leftAction ? <View style={styles.slotLeft}>{leftAction}</View> : <View style={styles.slotLeft} />}
+        {leftAction ? <View style={styles.slotLeft}>{leftAction}</View> : null}
         <View style={styles.titleWrap}>
           <Text style={styles.headerTitle}>{title}</Text>
         </View>
         <View style={styles.slotRight}>
           <View style={styles.rightRow}>
             {rightAction ? <View style={styles.rightActionWrap}>{rightAction}</View> : null}
-            <TouchableOpacity
-              accessibilityRole="button"
-              accessibilityLabel="Abrir menu de navegação"
-              activeOpacity={0.85}
-              onPress={toggleMenu}
-              style={styles.menuButton}
-            >
-              <Text style={styles.menuButtonIcon}>{menuOpen ? '✕' : '☰'}</Text>
-            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -120,6 +109,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingTop: spacing.sm,
     paddingBottom: spacing.md,
+    // Space reserved for the global menu button (rendered in AppNavigator)
+    // so it does not overlap header actions on the right.
+    paddingRight: spacing.md + 56,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
     gap: spacing.xs,
@@ -131,26 +123,11 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   slotLeft: { width: 44, alignItems: 'flex-start', justifyContent: 'center' },
-  slotRight: { alignItems: 'flex-end', justifyContent: 'center' },
+  slotRight: { minWidth: 44, alignItems: 'flex-end', justifyContent: 'center' },
   titleWrap: { flex: 1 },
   headerTitle: { fontSize: 22, fontWeight: 'bold', color: colors.textPrimary },
   rightRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  rightActionWrap: { maxWidth: 180 },
-  menuButton: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.full,
-    backgroundColor: colors.surfaceHigh,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  menuButtonIcon: {
-    fontSize: 18,
-    color: colors.textPrimary,
-    fontWeight: '900',
-  },
+  rightActionWrap: { maxWidth: 180, flexShrink: 1 },
 
   semestreBtn: {
     flexDirection: 'row',

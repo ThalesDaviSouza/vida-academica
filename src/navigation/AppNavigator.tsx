@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
   NavigationContainer,
-  StackActions,
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import {
@@ -54,8 +53,7 @@ export default function AppNavigator() {
     useState<keyof RootStackParamList>('Hoje');
 
   function syncCurrentRoute() {
-    const rootState = navigationRef.getRootState();
-    const route = rootState.routes[rootState.index];
+    const route = navigationRef.getCurrentRoute();
 
     if (route?.name && MENU_ITEMS.some((item) => item.name === route.name)) {
       setCurrentRoute(route.name as keyof RootStackParamList);
@@ -82,6 +80,10 @@ export default function AppNavigator() {
     return () => sub.remove();
   }, [menuOpen]);
 
+  const menuButtonTop = insets.top + spacing.sm;
+  const menuButtonSize = 40;
+  const menuTop = menuButtonTop + menuButtonSize + spacing.sm;
+
   return (
     <MenuProvider
       value={{
@@ -91,31 +93,49 @@ export default function AppNavigator() {
       }}
     >
       <View style={styles.container}>
-      <NavigationContainer
-        ref={navigationRef}
-        onReady={syncCurrentRoute}
-        onStateChange={() => {
-          syncCurrentRoute();
-          setMenuOpen(false);
-        }}
-      >
-        <Stack.Navigator
-          initialRouteName="Hoje"
-          screenOptions={{
-            animation: 'fade',
-            headerShown: false,
-            contentStyle: styles.content,
+        <NavigationContainer
+          ref={navigationRef}
+          onReady={syncCurrentRoute}
+          onStateChange={() => {
+            syncCurrentRoute();
+            setMenuOpen(false);
           }}
         >
-          {MENU_ITEMS.map((item) => (
-            <Stack.Screen
-              key={item.name}
-              name={item.name}
-              component={item.component}
-            />
-          ))}
-        </Stack.Navigator>
-      </NavigationContainer>
+          <Stack.Navigator
+            initialRouteName="Hoje"
+            screenOptions={{
+              animation: 'fade',
+              headerShown: false,
+              contentStyle: styles.content,
+            }}
+          >
+            {MENU_ITEMS.map((item) => (
+              <Stack.Screen
+                key={item.name}
+                name={item.name}
+                component={item.component}
+              />
+            ))}
+          </Stack.Navigator>
+        </NavigationContainer>
+
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel="Abrir menu de navegação"
+          activeOpacity={0.85}
+          onPress={() => setMenuOpen((v) => !v)}
+          style={[styles.menuButton, { top: menuButtonTop, right: spacing.md }]}
+        >
+          {menuOpen ? (
+            <Text style={styles.menuCloseIcon}>X</Text>
+          ) : (
+            <View style={styles.hamburger} pointerEvents="none">
+              <View style={styles.hamburgerLine} />
+              <View style={styles.hamburgerLine} />
+              <View style={styles.hamburgerLine} />
+            </View>
+          )}
+        </TouchableOpacity>
 
       {menuOpen && (
         <>
@@ -123,7 +143,7 @@ export default function AppNavigator() {
             onPress={() => setMenuOpen(false)}
             style={styles.backdrop}
           />
-          <View style={[styles.menu, { top: insets.top + 60 }]}>
+          <View style={[styles.menu, { top: menuTop }]}>
             {MENU_ITEMS.map((item) => {
               const active = item.name === currentRoute;
 
@@ -162,9 +182,26 @@ const styles = StyleSheet.create({
   content: {
     backgroundColor: colors.background,
   },
+  menuButton: {
+    position: 'absolute',
+    width: 40,
+    height: 40,
+    borderRadius: radius.full,
+    backgroundColor: colors.surfaceHigh,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 50,
+    elevation: 50,
+  },
+  hamburger: { width: 18, height: 14, justifyContent: 'space-between' },
+  hamburgerLine: { height: 2, borderRadius: 2, backgroundColor: colors.textPrimary },
+  menuCloseIcon: { color: colors.textPrimary, fontWeight: '900' },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0, 0, 0, 0.25)',
+    zIndex: 40,
   },
   menu: {
     position: 'absolute',
@@ -182,6 +219,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 16,
     elevation: 12,
+    zIndex: 45,
   },
   menuItem: {
     flexDirection: 'row',
